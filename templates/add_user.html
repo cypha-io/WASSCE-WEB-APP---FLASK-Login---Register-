@@ -1,0 +1,12 @@
+{% extends 'admin_dashboard.html' %}
+
+{% block content %}
+    <h2>Add User</h2>
+    <form method="POST" action="/admin/add_user">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <button type="submit">Add User</button>
+    </form>
+{% endblock %}

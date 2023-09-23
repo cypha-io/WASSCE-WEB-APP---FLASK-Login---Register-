@@ -34,7 +34,7 @@ def admin():
         return redirect(url_for('admin_login'))
     
     users = User.query.all()
-    return render_template('admin.html', users=users)
+    return render_template('admin_dashboard.html', users=users)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -110,6 +110,53 @@ def admin_logout():
     session.pop('admin_logged_in', None)
     flash('Admin logged out successfully!', 'success')
     return redirect(url_for('admin_login'))
+
+
+@app.route('/admin/add_user', methods=['GET', 'POST'])
+def add_user():
+    if not session.get('admin_logged_in'):
+        flash('Admin Login required!', 'danger')
+        return redirect(url_for('admin_login'))
+
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            flash('Username already exists. Please choose another username.', 'danger')
+        else:
+            new_user = User(username=username, password=password)
+            db.session.add(new_user)
+            db.session.commit()
+            flash('User added successfully!', 'success')
+
+    return render_template('add_user.html')
+
+@app.route('/admin/view_users')
+def view_users():
+    if not session.get('admin_logged_in'):
+        flash('Admin Login required!', 'danger')
+        return redirect(url_for('admin_login'))
+
+    users = User.query.all()
+    return render_template('view_users.html', users=users)
+
+@app.route('/admin/delete_user/<int:user_id>')
+def delete_user(user_id):
+    if not session.get('admin_logged_in'):
+        flash('Admin Login required!', 'danger')
+        return redirect(url_for('admin_login'))
+
+    user_to_delete = User.query.get(user_id)
+    if user_to_delete:
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        flash('User deleted successfully!', 'success')
+    else:
+        flash('User not found!', 'danger')
+
+    return redirect(url_for('view_users'))
 
 
 if __name__ == '__main__':
